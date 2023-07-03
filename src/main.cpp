@@ -7,6 +7,7 @@ uint8_t io_state = 0;
 
 uint32_t pulse_count = 0;
 uint8_t previous_read = 0;
+boolean count_open_time = 0;
 
 int SENSOR_PIN = 3; 
 int LED = 2; 
@@ -15,7 +16,7 @@ int OUT_PIN = 13;
 void setup() {
   // put your setup code here, to run once:
   pinMode(OUT_PIN, OUTPUT); // Output to mother board - HIGH if blocked, LOW if not
-  pinMode(SENSOR_PIN, INPUT_PULLUP); // Reading IR sensor
+  pinMode(SENSOR_PIN, INPUT); // Reading IR sensor
   pinMode(LED, OUTPUT); // Making LED blink
 
   output_timestamp = millis();
@@ -47,13 +48,13 @@ void loop() { //This runs all the time at SUPER HIGH speed
     This measures the same signal coming back through the IR receiver (With noise)
      We measure every 1 ms and count when it switches from LED OFF to LED ON
   */
-  if(millis() - sampling_timestamp > 1){ //Every 1 ms
+  if(millis() - sampling_timestamp > 10){ //Every 1 ms
     sampling_timestamp = millis();
-    if(digitalRead(SENSOR_PIN) && (previous_read == LOW)){ //If we see HIGH signal and last time we saw LOW
-      previous_read = HIGH; //Then we remember that we saw HIGH
+    if(!digitalRead(SENSOR_PIN) && (previous_read == HIGH)){ //If we see HIGH signal and last time we saw LOW
+      previous_read = LOW; //Then we remember that we saw HIGH
       pulse_count++; //We counted one pulse
-    }else if(!digitalRead(SENSOR_PIN) && (previous_read == HIGH)){ //If we see LOW signal and last time we saw HIGH
-      previous_read = LOW; //Then we remember that we saw LOW
+    }else if(digitalRead(SENSOR_PIN) && (previous_read == LOW)){ //If we see LOW signal and last time we saw HIGH
+      previous_read = HIGH; //Then we remember that we saw LOW
     }
   }
 
