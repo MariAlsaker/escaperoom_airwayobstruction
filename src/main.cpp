@@ -22,7 +22,6 @@ void setup() {
   output_timestamp = millis();
   sampling_timestamp = millis();
   capture_timestamp = millis();
-  //Serial.begin(9600);
 }
 
 void loop() { //This runs all the time at SUPER HIGH speed
@@ -30,20 +29,20 @@ void loop() { //This runs all the time at SUPER HIGH speed
   // put your main code here, to run repeatedly:
   
   /* This is a delta capture subroutine, which allows the processor to wait without disrupting other tasks */
-  /* Every 20 ms we want to flip the output of the IR LED for it to flash rapidly 
+  /* We want the IR LED to flash rapidly, tested this duy cycle of 25% and found that the sensor to register the signal continuously.
 
-                 20 ms             20 ms
-    LED ON ______      ______      ______      ______      
-                 |    |      |    |      |    |      |    |
-                 |    |      |    |      |    |      |    |
-    LED OFF      ------      ------      ------      ------
+                     60 ms                      20 ms
+    LED ON ______            ______            ______            ______
+                 |          |      |          |      |          |      
+                 |          |      |          |      |          |      
+    LED OFF      ------------      ------------      ------------      
   */
-  if(io_state==0 &&  millis() - output_timestamp > 60) { //Let the sensor rest for 60 sec
+  if(io_state==0 &&  millis() - output_timestamp > 60) { //Let the sensor rest for 60 milli sec
     output_timestamp = millis(); //Now that the subroutine is activated this is the new relative position we wait from
     io_state = 1; //Negate value, turn 0 into 1 and 1 into 0
     digitalWrite(LED, io_state); //Write the negated value to pin 3
   }
-  else if (io_state==1 && millis() - output_timestamp > 20) { //Give the sensor a signal to detect for 20 sec
+  else if (io_state==1 && millis() - output_timestamp > 20) { //Give the sensor a signal to detect for 20 milli sec
     output_timestamp = millis();
     io_state = 0;
     digitalWrite(LED, io_state);
@@ -51,7 +50,7 @@ void loop() { //This runs all the time at SUPER HIGH speed
 
   /* 
     This measures the same signal coming back through the IR receiver (With noise)
-     We measure every 1 ms and count when it switches from LED OFF to LED ON
+     We measure every 10 ms and count when it switches from LED OFF to LED ON
   */
   if(millis() - sampling_timestamp > 10){ //Every 10 ms
     sampling_timestamp = millis();
