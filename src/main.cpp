@@ -22,7 +22,7 @@ void setup() {
   output_timestamp = millis();
   sampling_timestamp = millis();
   capture_timestamp = millis();
-  Serial.begin(9600);
+  //Serial.begin(9600);
 }
 
 void loop() { //This runs all the time at SUPER HIGH speed
@@ -38,17 +38,22 @@ void loop() { //This runs all the time at SUPER HIGH speed
                  |    |      |    |      |    |      |    |
     LED OFF      ------      ------      ------      ------
   */
-  if(millis() - output_timestamp > 20){ //Every 20 ms
+  if(io_state==0 &&  millis() - output_timestamp > 60) { //Let the sensor rest for 60 sec
     output_timestamp = millis(); //Now that the subroutine is activated this is the new relative position we wait from
-    io_state = !io_state; //Negate value, turn 0 into 1 and 1 into 0
+    io_state = 1; //Negate value, turn 0 into 1 and 1 into 0
     digitalWrite(LED, io_state); //Write the negated value to pin 3
+  }
+  else if (io_state==1 && millis() - output_timestamp > 20) { //Give the sensor a signal to detect for 20 sec
+    output_timestamp = millis();
+    io_state = 0;
+    digitalWrite(LED, io_state);
   }
 
   /* 
     This measures the same signal coming back through the IR receiver (With noise)
      We measure every 1 ms and count when it switches from LED OFF to LED ON
   */
-  if(millis() - sampling_timestamp > 10){ //Every 1 ms
+  if(millis() - sampling_timestamp > 10){ //Every 10 ms
     sampling_timestamp = millis();
     if(!digitalRead(SENSOR_PIN) && (previous_read == HIGH)){ //If we see HIGH signal and last time we saw LOW
       previous_read = LOW; //Then we remember that we saw HIGH
@@ -61,7 +66,6 @@ void loop() { //This runs all the time at SUPER HIGH speed
   if(millis() - capture_timestamp > 500){ //Every 500 ms
     capture_timestamp = millis();
 
-    Serial.println(pulse_count); //We report the pulses we saw
     if(pulse_count < 2){ //If we saw less than 2 pulses the last 500 ms
       digitalWrite(OUT_PIN, HIGH); //It's probably blocked
     }else{ //If not
