@@ -3,14 +3,14 @@
 uint32_t output_timestamp = 0;
 uint32_t sampling_timestamp = 0;
 uint32_t capture_timestamp = 0;
-uint8_t io_state = 0;
+uint8_t io_state = LOW;
 
 uint32_t pulse_count = 0;
 uint8_t previous_read = 0;
 boolean count_open_time = 0;
 
 int SENSOR_PIN = 3; 
-int LED = 2; 
+int LED = 4; 
 int OUT_PIN = 13;
 
 void setup() {
@@ -22,6 +22,7 @@ void setup() {
   output_timestamp = millis();
   sampling_timestamp = millis();
   capture_timestamp = millis();
+  //Serial.begin(9600);
 }
 
 void loop() { //This runs all the time at SUPER HIGH speed
@@ -39,12 +40,12 @@ void loop() { //This runs all the time at SUPER HIGH speed
   */
   if(io_state==0 &&  millis() - output_timestamp > 60) { //Let the sensor rest for 60 milli sec
     output_timestamp = millis(); //Now that the subroutine is activated this is the new relative position we wait from
-    io_state = 1; //Negate value, turn 0 into 1 and 1 into 0
+    io_state = HIGH; //Negate value, turn 0 into 1 and 1 into 0
     digitalWrite(LED, io_state); //Write the negated value to pin 3
   }
   else if (io_state==1 && millis() - output_timestamp > 20) { //Give the sensor a signal to detect for 20 milli sec
     output_timestamp = millis();
-    io_state = 0;
+    io_state = LOW;
     digitalWrite(LED, io_state);
   }
 
@@ -64,7 +65,7 @@ void loop() { //This runs all the time at SUPER HIGH speed
 
   if(millis() - capture_timestamp > 500){ //Every 500 ms
     capture_timestamp = millis();
-
+    //Serial.println(pulse_count);
     if(pulse_count < 2){ //If we saw less than 2 pulses the last 500 ms
       digitalWrite(OUT_PIN, HIGH); //It's probably blocked
     }else{ //If not
